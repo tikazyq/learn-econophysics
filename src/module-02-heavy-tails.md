@@ -17,7 +17,7 @@
 1. 用一句话说出 CLT 失效在金融数据里**最常见的两个真实原因**(不是教科书答案)
 2. 解释 Lévy 稳定分布和"有限方差 + 幂律尾"这两种刻画的实证区别,以及为什么后者今天更主流
 3. 用 Python 跑 Hill 估计,得到 S&P 500 的尾指数 $\alpha \approx 3$ 这个著名经验结果("inverse cubic law")
-4. 知道**至少三个**常见的尾部估计陷阱,并能在自己跑代码时识别它们
+4. 知道**至少四个**常见的尾部估计陷阱,并能在自己跑代码时识别它们
 
 ---
 
@@ -250,7 +250,7 @@ def hill_estimator(sorted_desc, k):
     Xk1 = sorted_desc[k]
     return 1.0 / np.mean(np.log(sorted_desc[:k] / Xk1))
 
-ks = np.arange(20, n // 5)             # 别用太大的 k,会把主体吃进来
+ks = np.arange(20, min(n // 20, 500))  # 别用太大的 k,会把主体吃进来
 hill = np.array([hill_estimator(abs_r_sorted, k) for k in ks])
 
 axes[1].plot(ks, hill, "b-")
@@ -290,7 +290,7 @@ plt.show()
 
 ---
 
-## 2.6 三个常见陷阱
+## 2.6 四个常见陷阱
 
 ### 陷阱 1:用样本峰度判断"重尾程度"
 
