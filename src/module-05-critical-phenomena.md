@@ -130,13 +130,20 @@ for T in Ts:
     s = np.random.choice([-1, 1], size=(L, L))
     for _ in range(n_eq):
         metropolis_step(s, beta)
-    ms = []
+    m_abs_samples, m_sq_samples = [], []
     for _ in range(n_meas):
         metropolis_step(s, beta)
-        ms.append(np.abs(s.mean()))
-    ms = np.array(ms)
-    m_mean.append(ms.mean())
-    chi.append(L * L * ms.var() / T)
+        m_inst = s.mean()
+        m_abs_samples.append(abs(m_inst))
+        m_sq_samples.append(m_inst * m_inst)
+    m_abs_samples = np.array(m_abs_samples)
+    m_sq_samples  = np.array(m_sq_samples)
+    m_mean.append(m_abs_samples.mean())
+    # Finite-size |m|-based susceptibility (Newman-Barkema convention):
+    # chi' = beta * L^2 * (<m^2> - <|m|>^2). Using |m| is standard for finite L
+    # because the signed <m> averages to 0 below T_c due to incomplete symmetry
+    # breaking; chi' equals the true chi above T_c up to finite-size corrections.
+    chi.append(beta * L * L * (m_sq_samples.mean() - m_abs_samples.mean()**2))
 
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
 axes[0].plot(Ts, m_mean, "ko-")

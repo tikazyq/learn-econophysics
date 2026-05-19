@@ -153,7 +153,7 @@ axes[1,0].hist(r, bins=80, density=True); axes[1,0].set_yscale("log")
 axes[1,0].set_title("Return distribution (log)")
 
 from statsmodels.tsa.stattools import acf
-lags = np.arange(1, 200)
+lags = np.arange(1, 201)
 axes[1,1].loglog(lags, np.maximum(acf(np.abs(r), nlags=200, fft=True)[1:], 1e-4), "k.")
 axes[1,1].set_title(r"ACF of $|r|$")
 

@@ -123,19 +123,28 @@ class LOB:
 
     def best_bid(self): return max(self.bids) if self.bids else None
     def best_ask(self): return min(self.asks) if self.asks else None
-    def mid(self): return 0.5 * (self.best_bid() + self.best_ask())
+    def mid(self):
+        b, a = self.best_bid(), self.best_ask()
+        if b is None or a is None:
+            return self._last_mid if hasattr(self, "_last_mid") else 100.0
+        self._last_mid = 0.5 * (b + a)
+        return self._last_mid
 
     def submit_limit(self, side, price):
         book = self.bids if side == "buy" else self.asks
         book[round(price, 2)] += 1
 
     def submit_market(self, side):
+        # Side-empty guard: skip if no counter-side liquidity (lab is illustrative,
+        # not a production matching engine).
         if side == "buy":
             p = self.best_ask()
+            if p is None: return None
             self.asks[p] -= 1
             if self.asks[p] == 0: del self.asks[p]
         else:
             p = self.best_bid()
+            if p is None: return None
             self.bids[p] -= 1
             if self.bids[p] == 0: del self.bids[p]
         return p
@@ -162,7 +171,8 @@ for t in range(20000):
         lob.submit_limit(side, price)
     elif u < rate_limit + rate_market:
         p = lob.submit_market(side)
-        trades.append((t, p, side))
+        if p is not None:
+            trades.append((t, p, side))
     else:
         lob.cancel(side)
     mids.append(lob.mid())

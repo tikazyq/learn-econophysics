@@ -148,9 +148,11 @@ nu = 0.5
 dt = 0.02
 T = 1000
 
-# 初始密度:左侧买单逐渐增大,右侧卖单逐渐增大(线性)
-rho_B = np.maximum(-x, 0)
-rho_A = np.maximum(x, 0)
+# 初始密度:左侧买单线性增大,右侧卖单线性增大,中心区域用 Gaussian 软化
+# 保证 rho_B 和 rho_A 在 mid 附近有非零重叠,反应区从 t=0 就存在
+soft = np.exp(-(x / 0.5)**2)
+rho_B = np.maximum(-x, 0) + 0.3 * soft
+rho_A = np.maximum(x, 0)  + 0.3 * soft
 
 # Meta-order: 在某时间窗内向右注入额外买单
 J_meta_start, J_meta_end = 200, 500
@@ -175,8 +177,8 @@ for t in range(T):
         idx = np.argmin(np.abs(x - J_meta_x))
         rho_B[idx] += J_meta_amp * dt
 
-    # 价格 = 反应最强的位置(rho_B * rho_A 极大的 x)
-    p_t = x[np.argmax(rho_B * rho_A)]
+    # 价格 = rho_B 与 rho_A 的交叉点(|rho_B - rho_A| 最小的 x)
+    p_t = x[np.argmin(np.abs(rho_B - rho_A))]
     prices.append(p_t)
 
 prices = np.array(prices)
