@@ -1,0 +1,38 @@
+[book]
+authors = ["Marvin"]
+language = "zh-CN"
+multilingual = false
+src = "src"
+title = "Econophysics 笔记 · 物理学家视角下的金融市场"
+description = "面向物理学家自学者的经济物理学教材:从重尾分布、随机过程到临界现象、订单簿与 ABM"
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = ""
+edit-url-template = ""
+mathjax-support = true
+copy-fonts = true
+no-section-label = false
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+
+[output.html.print]
+enable = true
+page-break = true
+
+[preprocessor.index]
+[preprocessor.links]

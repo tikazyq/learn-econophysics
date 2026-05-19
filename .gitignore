@@ -1,0 +1,28 @@
+# mdBook build output
+book/
+
+# Vercel
+.vercel/
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (in case you add tooling later)
+node_modules/
+
+# Local-only: source material + reference book (not part of the published book)
+_source/
+_reference-rust-book/
+
+# Python lab byproducts
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

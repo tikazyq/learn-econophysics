@@ -1,0 +1,54 @@
+name: Build & Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  MDBOOK_VERSION: "0.4.40"
+
+jobs:
+  build:
+    name: Build mdBook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache mdbook binary
+        id: cache-mdbook
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/mdbook
+          key: mdbook-${{ env.MDBOOK_VERSION }}
+
+      - name: Install mdbook
+        if: steps.cache-mdbook.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.local/bin
+          curl -sL "https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C ~/.local/bin
+
+      - name: Build book
+        run: ~/.local/bin/mdbook build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: book
+          path: book/
+          retention-days: 7
+
+  link-check:
+    name: Check for broken links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lychee link checker
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --exclude-mail './src/**/*.md'
+          fail: false  # warn don't fail; many academic links churn
