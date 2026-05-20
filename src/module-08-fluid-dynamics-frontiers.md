@@ -146,18 +146,20 @@ x = np.arange(L) * dx - L * dx / 2
 D = 0.05
 nu = 0.5
 dt = 0.02
-T = 1000
+T = 2500
+kappa = 0.15     # 平衡态回拉率:模拟"新挂单"维持 V 形
 
-# 初始密度:左侧买单线性增大,右侧卖单线性增大,中心区域用 Gaussian 软化
-# 保证 rho_B 和 rho_A 在 mid 附近有非零重叠,反应区从 t=0 就存在
+# 初始/平衡态密度:左侧买单线性增大,右侧卖单线性增大,中心 Gaussian 软化
 soft = np.exp(-(x / 0.5)**2)
-rho_B = np.maximum(-x, 0) + 0.3 * soft
-rho_A = np.maximum(x, 0)  + 0.3 * soft
+rho_B_eq = np.maximum(-x, 0) + 0.3 * soft
+rho_A_eq = np.maximum(x, 0)  + 0.3 * soft
+rho_B = rho_B_eq.copy()
+rho_A = rho_A_eq.copy()
 
-# Meta-order: 在某时间窗内向右注入额外买单
-J_meta_start, J_meta_end = 200, 500
-J_meta_x = -2.0   # 注入在 x = -2 处
-J_meta_amp = 0.5
+# Meta-order:在 [t_start, t_end) 时间窗内,持续在当前价位注入买单
+J_meta_start, J_meta_end = 400, 1200
+J_meta_x = 0.0       # 在 x = 0 处注入(初始价位)
+J_meta_amp = 12.0    # 注入速率(单位密度/时间)
 
 prices = []
 for t in range(T):
@@ -168,16 +170,20 @@ for t in range(T):
     rho_B = np.maximum(rho_B, 0)
     rho_A = np.maximum(rho_A, 0)
 
-    # 扩散(简单有限差分)
+    # 扩散(显式有限差分)
     rho_B[1:-1] += D * dt / dx**2 * (rho_B[2:] - 2 * rho_B[1:-1] + rho_B[:-2])
     rho_A[1:-1] += D * dt / dx**2 * (rho_A[2:] - 2 * rho_A[1:-1] + rho_A[:-2])
 
-    # Meta-order
+    # 平衡态回拉:新挂单不断把密度推回 V 形(这是回归性的根源)
+    rho_B += kappa * (rho_B_eq - rho_B) * dt
+    rho_A += kappa * (rho_A_eq - rho_A) * dt
+
+    # Meta-order:持续注入
     if J_meta_start <= t < J_meta_end:
         idx = np.argmin(np.abs(x - J_meta_x))
         rho_B[idx] += J_meta_amp * dt
 
-    # 价格 = rho_B 与 rho_A 的交叉点(|rho_B - rho_A| 最小的 x)
+    # 价格 = rho_B 与 rho_A 的交叉点
     p_t = x[np.argmin(np.abs(rho_B - rho_A))]
     prices.append(p_t)
 
@@ -200,11 +206,24 @@ plt.tight_layout()
 plt.show()
 ```
 
-**你应该看到**:
+跑出来的数字(`scripts/m08.py`):
 
-- 稳态时密度形如双线性 V 形——latent liquidity 的标志几何
-- meta-order 期间价格往注入方向移动,**形状不是线性而是次线性**(根号风格的爬升)
-- meta-order 结束后,价格**部分回归**——反向反应
+```text
+price before meta-order: 0.000
+price at meta-order end (t=1200): 1.000  (impact = +1.000)
+price at simulation end (t=2500): 0.000  (residual = +0.000, reversion = 100.0% of peak impact)
+```
+
+![Donier PDE: latent supply V-shape and meta-order impact-then-reversion](assets/m08-donier-pde.png)
+
+两张图把整个故事讲完:
+
+- **左:最终密度剖面**——回拉项 $\kappa(\rho_{eq}-\rho)$ 保持了干净的 V 形,价格(黑虚线)精准落在 $\rho_B = \rho_A$ 的交叉点 $x=0$——meta-order 结束后系统完全松弛回平衡
+- **右:价格随时间**——这是这门学科的"压轴图":
+  - meta-order 期间(橙色区域),价格逐步从 0 爬到 **+1.0**——形状明显**凹型(次线性)**,而非线性,定性符合 square-root impact
+  - meta-order 结束后,价格在 ~1300 步内**完全回归**到 0——这是 Donier–Bouchaud "reversion after meta-order" 的核心预测
+
+> 调参注意:为了让 reversion 干净可见,我们让 `kappa = 0.15`(回拉时间尺度 ~7 时间单位,比 meta-order 持续时长 16 单位短)。如果不加回拉项(原版 PDE 只有 reaction-diffusion),注入的买单累积成不会消失的"鼓包",价格会**单调上漂**,看不到回归——这就是为什么 Donier–Bouchaud 原论文必须引入限价单/撤单率两个源汇项。
 
 这是把模块 6 的 square-root impact 在 PDE 层面"亲手解出"的演示——也是这本书的最终演示。
 

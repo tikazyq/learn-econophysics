@@ -111,13 +111,15 @@ $$
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from scipy import stats
+from statsmodels.tsa.stattools import acf
 
 class LOB:
-    def __init__(self, mid=100.0, tick=0.01, depth_init=10):
+    def __init__(self, mid=100.0, tick=0.01, depth_init=5):
         self.tick = tick
         self.bids = defaultdict(int)
         self.asks = defaultdict(int)
-        for k in range(1, 20):
+        for k in range(1, 30):
             self.bids[round(mid - k*tick, 2)] = depth_init
             self.asks[round(mid + k*tick, 2)] = depth_init
 
@@ -134,60 +136,72 @@ class LOB:
         book = self.bids if side == "buy" else self.asks
         book[round(price, 2)] += 1
 
-    def submit_market(self, side):
-        # Side-empty guard: skip if no counter-side liquidity (lab is illustrative,
-        # not a production matching engine).
-        if side == "buy":
-            p = self.best_ask()
-            if p is None: return None
-            self.asks[p] -= 1
-            if self.asks[p] == 0: del self.asks[p]
-        else:
-            p = self.best_bid()
-            if p is None: return None
-            self.bids[p] -= 1
-            if self.bids[p] == 0: del self.bids[p]
-        return p
+    def submit_market(self, side, size=1):
+        # Walk up to `size` shares through the book.
+        traded = 0
+        notional = 0.0
+        book = self.asks if side == "buy" else self.bids
+        pick = min if side == "buy" else max
+        while traded < size and book:
+            p = pick(book)
+            take = min(size - traded, book[p])
+            book[p] -= take
+            if book[p] == 0: del book[p]
+            notional += take * p; traded += take
+        return notional / traded if traded > 0 else None
 
     def cancel(self, side):
         book = self.bids if side == "buy" else self.asks
         if not book: return
-        prices = list(book.keys())
-        p = np.random.choice(prices)
+        p = np.random.choice(list(book.keys()))
         book[p] -= 1
         if book[p] == 0: del book[p]
 
 np.random.seed(0)
 lob = LOB()
 mids, trades = [], []
-rate_limit, rate_market, rate_cancel = 0.5, 0.15, 0.35
+rate_limit, rate_market, rate_cancel = 0.55, 0.20, 0.25
 
-for t in range(20000):
+for t in range(50000):
     side = np.random.choice(["buy", "sell"])
     u = np.random.rand()
     if u < rate_limit:
-        offset = np.random.randint(1, 6) * lob.tick
-        price = (lob.best_bid() - offset) if side == "buy" else (lob.best_ask() + offset)
+        # Half the limit orders price-improve (offset=0); rest sit 1-4 ticks deep
+        offset = np.random.choice([0, 0, 1, 2, 3, 4]) * lob.tick
+        ref = lob.best_bid() if side == "buy" else lob.best_ask()
+        price = (ref + offset) if side == "buy" else (ref - offset)
+        # Don't cross the book with a "limit" order
+        opp = lob.best_ask() if side == "buy" else lob.best_bid()
+        if opp is not None:
+            if side == "buy" and price >= opp:  price = opp - lob.tick
+            if side == "sell" and price <= opp: price = opp + lob.tick
         lob.submit_limit(side, price)
     elif u < rate_limit + rate_market:
-        p = lob.submit_market(side)
-        if p is not None:
-            trades.append((t, p, side))
+        # Variable-sized market orders: occasional bursts walk multiple levels
+        size = int(np.random.choice([1, 1, 2, 3, 5], p=[0.45, 0.25, 0.15, 0.10, 0.05]))
+        p = lob.submit_market(side, size=size)
+        if p is not None: trades.append((t, p, side, size))
     else:
         lob.cancel(side)
     mids.append(lob.mid())
 
 mids = np.array(mids)
-r = np.diff(np.log(mids))
+# Coarse-grain to bars so each return mixes many micro-events
+bar = 50
+mid_bar = mids[bar - 1::bar]
+r = np.diff(np.log(mid_bar))
 
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-axes[0].plot(mids, lw=0.5); axes[0].set_title("Mid-price path")
-axes[1].hist(r, bins=80, density=True); axes[1].set_yscale("log")
-axes[1].set_title("Return distribution (log scale)")
+axes[0].plot(mids, lw=0.5); axes[0].set_title("Mid-price path (tick by tick)")
+axes[1].hist(r, bins=60, density=True, alpha=0.7, label="bar returns")
+mu, sd = r.mean(), r.std()
+xs = np.linspace(r.min(), r.max(), 200)
+axes[1].plot(xs, stats.norm.pdf(xs, mu, sd), "r-", lw=2, label=r"$\mathcal{N}(\mu, \sigma^2)$")
+axes[1].set_yscale("log"); axes[1].legend()
+axes[1].set_title(f"Return distribution at {bar}-step bars")
 
-from statsmodels.tsa.stattools import acf
-acf_abs = acf(np.abs(r), nlags=200, fft=True)[1:]
-axes[2].loglog(np.arange(1, 201), np.maximum(acf_abs, 1e-4), "k.")
+acf_abs = acf(np.abs(r), nlags=100, fft=True)[1:]
+axes[2].loglog(np.arange(1, 101), np.maximum(acf_abs, 1e-4), "k.")
 axes[2].set_title(r"ACF of $|r|$ (log-log)")
 axes[2].set_xlabel("lag"); axes[2].set_ylabel(r"$\rho_{|r|}$")
 
@@ -195,13 +209,27 @@ plt.tight_layout()
 plt.show()
 ```
 
-**你应该看到**:
+跑出来的数字(`scripts/m06.py`):
 
-- 中价路径看起来像随机游走
-- 收益率分布在 log 尺度下尾部明显比正态重——**重尾自发涌现**,即使所有微观决策都是纯随机的
-- $|r|$ 的 ACF **大致衰减但比真实数据快**——零智能 LOB 复现了重尾,但波动率聚集的长程性需要更复杂的 agent
+```text
+#trades = 9991 / 50000 steps; #bars = 1000
+mid: min = 99.085, max = 100.015, range = 0.930
+bar return: std = 0.00013, kurtosis = 62.09
+ACF(|r|) at lag 1, 5, 20, 50 = 0.238, 0.084, 0.085, 0.048
+```
 
-这个对比正好引出模块 7:为什么 ABM 要加进异质 agent。
+![Zero-intelligence LOB: mid-price, bar-return distribution, |r| ACF](assets/m06-zero-intel-lob.png)
+
+照着图和数字读:
+
+- **左:中价路径**——大部分时间在 100.0 附近 jitter,但在 t≈30k 附近出现近 1 元的"无理由"暴跌——所有微观决策都是随机的,**宏观大幅波动自发涌现**
+- **中:bar 收益率分布**——蓝色直方图明显比红色高斯外延更远,峰度 62(高斯=0)——**重尾自发涌现**,只靠纯随机的零智能 agent
+- **右:$|r|$ 的 ACF**——lag 1 是 0.24,衰减到 lag 50 仍有 0.05——有一定波动率聚集,但比真实股票数据(60 个 lag 仍是 0.3)弱得多
+
+> ⚠️ 调参注意:tick 离散化是这个模型的麻烦源——单步 mid 变化只能是 0、±½tick、±1tick…所以**必须把收益率粗化(bar=50 步聚合)**,否则直方图退化成几根离散棒,看不出尾部。这是教学版的代价。
+> 此外,初始 depth、limit-offset 分布、market-order 尺寸分布都是手动平衡过的:depth_init 太大、order 都 size=1 时,price 一动不动;depth_init 太小、market burst 太频繁,book 直接被打穿。**SFGK 原文用连续价格+泊松到达率绕开了这个,但教学上 tick 版更直观**。
+
+这个模型复现了重尾,但波动率聚集只是雏形——这正引出模块 7:为什么 ABM 要加进异质 agent。
 
 ---
 

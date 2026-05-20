@@ -119,8 +119,8 @@ def metropolis_step(s, beta):
     return s
 
 L = 32
-n_eq = 200       # equilibration sweeps
-n_meas = 500     # measurement sweeps
+n_eq = 1000      # equilibration sweeps
+n_meas = 3000    # measurement sweeps
 Ts = np.linspace(1.6, 3.2, 12)
 Tc_theory = 2 / np.log(1 + np.sqrt(2))  # ≈ 2.269
 
@@ -159,10 +159,20 @@ plt.tight_layout()
 plt.show()
 ```
 
-**你应该看到**:
+跑出来的数字(`scripts/m05.py`,约 8 分钟):
 
-- $|m|$:在 $T_c \approx 2.27$ 附近从近 1 急剧下降到 0
-- $\chi$:在 $T_c$ 附近有一个尖峰——发散的有限尺寸版本
+```text
+Theoretical Tc = 2.269
+chi peaks at T = 2.327, chi_max = 24.79
+|m| at T=1.6: 0.979    |m| at T=3.2: 0.070
+```
+
+![Magnetization and susceptibility across the 2D Ising transition](assets/m05-ising-transition.png)
+
+两张图清楚展示了相变:
+
+- **左:磁化 $|m|$**——T 从 1.6 到 3.2 扫过去,$|m|$ 从 0.98 急剧下降到 0.07,转折点恰好在 $T_c$ 附近
+- **右:磁化率 $\chi$**——在 $T = 2.33$ 出现尖峰($\chi_{\max} \approx 24.8$),与 Onsager 给的 $T_c = 2.269$ 偏差只 2%(L=32 的有限尺寸效应所致;Binder cumulant 分析能进一步压到 1% 以下)
 - 这正是相变的标志。把金融市场粗暴地映射成 Ising,**类似的尖峰应该对应崩盘前的波动率爆炸**
 
 ---
