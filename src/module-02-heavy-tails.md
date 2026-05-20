@@ -246,7 +246,7 @@ $$
 
 值得提一句 Hill 估计的来路。1975 年 Bruce Hill 在 *Annals of Statistics* 上发表这篇方法论时，目标读者不是金融人——是**精算师和极值理论（extreme value theory， EVT）社区**。1970 年代极值统计在保险定价里已经是工业级工具：大灾损失、长尾保单、再保险层级的设计，都依赖 Pareto 尾的估计。Hill plot 那个"找平台"的视觉判断，是精算师面对单次大灾损失数据时已经磨了几年的实操经验。Embrechts–Klüppelberg–Mikosch 1997 的 *Modelling Extremal Events for Insurance and Finance* 这本书的副标题没说错，工具确实先在保险一侧成熟，然后在 1990 年代末才被搬到金融。Hill plot 看起来"哪都不平"是常态——我看了三年才接受"平台从来不平"这件事，初学者会觉得方法失败，其实你只要在某个有意义的区间（比如 $k$ 从 50 到 500）看到 $\hat\alpha$ 在某个值附近抖动，就足够说"尾指数大约是这个值"。**追求完美平台是新手错误**，真实数据从来不会给你严格 Pareto 的尾。
 
-### 2.4.3 MLE on Pareto tail above $x_{\min}$(Clauset et al. 推荐）
+### 2.4.3 MLE on Pareto tail above $x_{\min}$（Clauset et al. 推荐）
 
 把模型设为"超过某阈值 $x_{\min}$ 后是纯 Pareto"：
 

@@ -61,7 +61,7 @@ $J > 0$：邻居倾向同向（铁磁）；$h$：外场。给定温度 $T$，平
 
 ---
 
-## 5.3 Log-Periodic Power Law(LPPL）与崩盘预测
+## 5.3 Log-Periodic Power Law（LPPL）与崩盘预测
 
 Sornette 一脉最有争议、也最有名的工作是 **LPPL 模型**。它把对数价格在崩盘前的演化拟合成：
 
