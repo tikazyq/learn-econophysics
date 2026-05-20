@@ -3,6 +3,8 @@
 > "If you take the physics analogy seriously, then markets are not statistical mechanics — they are fluid mechanics."
 > —— Jean-Philippe Bouchaud, in conversation (paraphrased)
 
+2010 年代中,Capital Fund Management 巴黎办公室的一间小会议室。Bouchaud、Jonathan Donier、Iacopo Mastromatteo 几个人在白板上画——他们想写出**一个偏微分方程,同时给出三件事**:短时尺度上价格的扩散行为(也就是模块 3 的 GBM 那一块)、meta-order 期间的 √(Q) impact(模块 6 主线)、meta-order 结束后的价格回归(Bouchaud–Farmer 反向反应理论的连续版本)。他们从一个反应-扩散 ansatz 出发——隐藏的买卖意向密度 $\rho_B, \rho_A$ 在价格轴上扩散、在相遇处反应。在白板上画完几次迭代后,他们发现一件事:**潜在供给曲线的稳态形状自然演化成 V 形**,而 √(Q) 冲击是这个 V 形几何的直接积分结果——不需要单独 postulate,从方程结构自己出来。Donier、Bonart、Mastromatteo、Bouchaud 把这件事写成 *A Fully Consistent, Minimal Model for Non-Linear Market Impact*,2015 年发表在 *Quantitative Finance* 15(7)。这是经济物理学过去三十年里少数"一个 PDE 抓住多个 stylized facts"的成就之一——也是这本书的会聚点。
+
 这是本书的会聚点。前面七模块走过重尾、随机过程、协方差、临界、订单簿、ABM。每个模块都用了不同的物理工具,但**它们之间有没有统一的语言?**
 
 有,而且不止一层。**形式上的统一**是流体力学——密度、速度场、压力场、守恒律 + 本构关系,把市场写成偏微分方程。**内容上的统一**更深:这是一类长期被本科教材边缘化的物理——self-referential / observation-coupled 系统——在金融这个具体子领域的展开。本模块两件事同时做:把市场写成 PDE,顺手把 econophysics 在物理学版图上的位置说清楚。
@@ -26,7 +28,7 @@
 - **统计力学**:从大量粒子的微观相互作用,涌现出温度、压强等宏观量
 - **流体力学**:把宏观量当成连续场,用守恒律 + 本构关系写偏微分方程
 
-如果物理学只有这两个寄存器,econophysics 的位置确实尴尬——市场的"粒子"会学习、会预测、会因为读了你的模型而调整行为。这不是 Navier–Stokes 假设里的流体。模块 1 §1.4 列出的第三条批评在这个二寄存器物理观下是中肯的。
+如果物理学只有这两个寄存器,econophysics 的位置确实尴尬——市场的"粒子"会学习、会预测、会因为读了你的模型而调整行为。这不是 Navier–Stokes 假设里的流体。模块 1 末尾"案例文件"那段列出的第三条批评(把物理学定义窄化到粒子和流体两个寄存器),在这个二寄存器物理观下是中肯的。
 
 但物理学有第三个寄存器,长期被本科教材边缘化:**self-referential / observation-coupled / active 系统**。它的定义性特征是:状态变量本身依赖于系统对自身状态的表征。
 
@@ -38,6 +40,8 @@
 这些系统听起来像哲学,但它们是物理:有定义良好的状态空间、有动力学方程、在合适的极限下有涨落-耗散关系。Soros 的反身性、Keynes(1936 ch.12)的 beauty contest、MacKenzie 的 performative finance、Lo 的 adaptive markets hypothesis,在这个寄存器里**不是对物理学的反驳——它们是这个寄存器在金融子领域的具体例化**。
 
 **Econophysics 属于第三个寄存器**:不是统计力学的旁支,也不是借用流体类比的尴尬模仿,而是 self-referential statistical physics 在金融市场上的展开。它和 active matter、neural physics、quantum measurement theory 共享同一个母类。
+
+我个人对"第三寄存器"这个说法犹豫过一段时间——因为它听起来很像在通过重新定义物理学边界来赢辩论。如果你需要扩大"物理学"这个词的定义才能让 econophysics 算物理,那是不是默认 econophysics 在原本的定义下其实不算?这个怀疑直到我开始翻 active matter physics 的文献(Marchetti 2013 *RMP* 那篇综述是入口)才解开。物理学家自己把这套"含主动 agent + observation-coupled + self-referential"的语言用了十几年——不是为了和经济学家辩论,是为了描述他们自己也不太理解的鸟群、细菌悬液、上皮组织。把同样的方法论标签拿来给市场用,不是为 econophysics 抢地盘,是认领一个已经被 active matter 社区开拓了十年的母类。这件事我接受了之后,这本书写起来才顺。
 
 这件事一旦说穿,本模块剩下的数学结构需要重读:
 
@@ -257,6 +261,8 @@ price at simulation end (t=2500): 0.000  (residual = +0.000, reversion = 100.0% 
 
 这是把模块 6 的 square-root impact 在 PDE 层面"亲手解出"的演示——也是这本书的最终演示。
 
+这个 lab 不只是教学。它处理的对象——meta-order 的 √(Q) 冲击 + 结束后的 reversion——**是几乎所有大型量化基金执行算法层的真实生产逻辑**。CFM 的执行系统、Two Sigma 的 VWAP/IS 算法、Renaissance Technologies 的内部执行——你不会拿到具体源码,但所有公开材料(包括他们自己发表的论文,如 Tóth 等 2011 *PRX*、Bouchaud 等 2018 那本 *Trades, Quotes and Prices*)都指向同一套底层模型:**每天交易开始前,根据当天预期成交量 $V$ 和波动率 $\sigma_d$,把 meta-order 总量 $Q$ 转换为冲击预算,然后拆单**。Donier PDE 是这套算法的"continuous-time 版本",在数学上等价。我第一次跑 Donier PDE 时,把 $\nu$ 调错了三个数量级,价格直接漂走没有回归——这件事让我对反应率敏感性建立了直觉:Donier 模型不是"加一点反应项让方程好看",反应率本身是控制整套系统稳定性的关键参数。这条 lab 跑通的时候,你看到的就是工业级算法的物理内核。
+
 ---
 
 ## 8.6 常见误解
@@ -299,7 +305,7 @@ Latent liquidity 模型如何在数学上给出 square-root impact?写出 meta-o
 
 #### 习题 8.4(开放)
 
-如果你给学生介绍"为什么物理学家研究金融",你会用什么例子开头?(模块 1 的 Q-Q plot?模块 6 的 square-root impact?模块 8 的 PDE?……)用 100 字写出你的开场白。
+如果你给学生介绍"为什么物理学家研究金融",你会用什么例子开头?(模块 2 开篇的 Q-Q plot?模块 6 的 square-root impact?模块 8 的 PDE?……)用 100 字写出你的开场白。
 
 #### 习题 8.5(挑战)
 
@@ -349,7 +355,7 @@ Latent liquidity 模型如何在数学上给出 square-root impact?写出 meta-o
 
 没有下一模块了。如果你跟到这里:
 
-1. 你应该亲眼看过 S&P 500 的重尾(模块 1)
+1. 你应该亲眼看过 S&P 500 的重尾(模块 2 开篇的 Q-Q lab)
 2. 估过尾指数,$\hat\alpha \approx 3$(模块 2)
 3. 验证过 $|r|$ 的长程 ACF(模块 3)
 4. 看过 S&P 500 谱叠在 MP 曲线上(模块 4)
@@ -363,7 +369,7 @@ Latent liquidity 模型如何在数学上给出 square-root impact?写出 meta-o
 - **如果你想做学术**:挑一个开放方向(rough vol 机制、MFG、ML × ABM……)读最近 3 年的论文,直接进入前沿
 - **如果你想做业界 quant**:RMT 清洗、Hawkes 模型、square-root impact 在执行算法和风控里都直接可用
 - **如果你想做政策研究**:Haldane 的方向,ABM × stress test
-- **如果你只是好奇**:回到模块 1.1,Bachelier 1900 那段——你现在应该懂为什么金融数学的起点本来就在物理学这边
+- **如果你只是好奇**:回到模块 1 开头那段——Bachelier 1900 年答辩厅——你现在应该懂为什么金融数学的起点本来就在物理学这边
 
 ---
 

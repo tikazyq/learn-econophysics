@@ -6,7 +6,60 @@
 > "Actually, no. It's just very, very large — and that matters."
 > —— Three decades of subsequent empirical work
 
-模块 1 我们亲眼看到了 S&P 500 的 Q-Q 图在两端向外弯出去。这模块要做三件事:
+1998 到 1999 年,波士顿大学物理系的一间机房里,Gopikrishnan、Plerou 和 H. Eugene Stanley 在处理当时刚到手的 NYSE TAQ tick 数据——上千只个股、几年时间、几千万笔交易,这是公开学术研究里第一次有这种规模的高频数据。他们对每只股票分别估尾指数 $\alpha$,然后把所有股票的估计值画在一起。让他们震惊的不是平均值——大约 3——而是稳定性:从大盘股到小盘股,从一分钟收益率到一天收益率,从美股到欧洲、亚洲、新兴市场,$\alpha$ 都在 $3 \pm 0.5$ 这个窄带里。这种跨资产、跨时间尺度、跨市场的 universality,在统计物理里通常意味着一件事——你看到的不是一个统计偶然,而是某个底层动力学的临界指数。1999 年他们把这件事写成 *Scaling of the Distribution of Fluctuations of Financial Market Indices* 发表在 *Physical Review E*——经济物理学最 robust 的经验定律 inverse cubic law 由此立稳。
+
+引言里我让你看了一张 S&P 500 收益率的 Q-Q 图,两端向外弯出去。但那是我让你看的图。**这一章你自己跑一遍**,然后我们用整章拆这条弯曲的形状。代码和模块 1 答辩厅那张照片不同的地方在于:它是你这本书里第一个动手的环节。
+
+```python
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# 下载 S&P 500 过去 20 年的日数据
+spx = yf.download("^GSPC", start="2005-01-01", end="2025-01-01", auto_adjust=True)
+returns = np.log(spx["Close"]).diff().dropna().values.flatten()
+
+# 1. 直方图 vs 同方差正态
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+mu, sigma = returns.mean(), returns.std()
+x = np.linspace(returns.min(), returns.max(), 500)
+
+axes[0].hist(returns, bins=200, density=True, alpha=0.6, label="empirical")
+axes[0].plot(x, stats.norm.pdf(x, mu, sigma), "r-", lw=2, label=r"$\mathcal{N}(\mu, \sigma^2)$")
+axes[0].set_yscale("log")  # 关键:log 尺度才看得到尾部
+axes[0].set_title("S&P 500 daily log-returns vs Gaussian")
+axes[0].set_xlabel("log-return"); axes[0].set_ylabel("density (log)")
+axes[0].legend()
+
+# 2. Q-Q plot —— 尾部对得齐就走直线
+stats.probplot(returns, dist="norm", plot=axes[1])
+axes[1].set_title("Q-Q plot against normal")
+
+plt.tight_layout()
+plt.show()
+```
+
+跑出来的结果(已附在仓库 `scripts/m01.py`):
+
+```text
+n_obs = 5032
+mu = 0.000316, sigma = 0.012103
+min = -0.1277, max = 0.1096
+sample kurtosis = 13.03  (Gaussian excess kurtosis = 0)
+#|r|>4σ = 36   Gaussian expectation ≈ 0.32
+```
+
+![S&P 500 daily log-returns vs Gaussian, plus Q-Q plot](assets/m01-gaussian-fails.png)
+
+两张图就把"高斯不够用"讲清楚了:
+
+- **直方图(左)**:在 log 尺度下,正态分布的红线在尾部"垂直下落",但实际数据像两条慢慢倾斜的直线——这就是 power-law 尾部的视觉特征
+- **Q-Q plot(右)**:在两端明显**偏离 45° 线**,向外弯出去——经验分布的极端值比正态分布预测的"严重得多"
+- **数字层面**:样本峰度 13.0(高斯是 0);4σ 以外的事件出现了 36 次,而高斯只允许约 0.32 次——把"百年一遇"变成"每年一遇"
+
+这就是这枚指纹的本人面目。模块剩下的内容要做三件事:
 
 1. **讲清楚 CLT 为什么没救回正态分布**——课本里那条"独立同分布求和趋向高斯"的定理,在金融收益率这里到底卡在哪一步
 2. **把"重尾"这个直觉术语形式化**——power-law 尾、Lévy 稳定分布、Student-t、truncated Lévy 几种典型刻画,各自的内核和分歧
@@ -78,6 +131,8 @@ $$
 
 **为什么 $\alpha \approx 3$ 这么重要?** 因为它把股票收益率精准地放在"方差有限,但峰度无穷"这一档——你能算波动率,但算不准超额峰度,且任何"4 阶矩 / 5 阶矩"的策略都注定不稳定。后面 RMT(模块 4)和 ABM(模块 7)都会用到这条约束。
 
+把这件事用数字落地。S&P 500 日收益率的样本标准差 $\sigma \approx 1.2\%$。在严格的 Gaussian 假设下,**单边 5σ 下跌**(单日跌幅 6%)的概率约 $\Phi(-5) \approx 2.87 \times 10^{-7}$——按一年 252 个交易日折算,期望等待时间 $1/(252 \times 2.87 \times 10^{-7}) \approx 1.4 \times 10^4$ 个年,也就是**大约一万四千年才出现一次**。在 $\alpha = 3$ 的幂律尾部,把模块 2 开篇 lab 里"$|r|>4\sigma$ 一年约 1.8 次"作为锚校准 prefactor,同样幅度的事件经验上**一年出现 1 次左右**。两者差距约**四个数量级**——不是建模选择题,是"模型说的世界"和"实际的世界"完全不是同一个对象。仅 2008 年一年,S&P 500 就有 4 个绝对值超过 5σ 的交易日(10 月 13 日 +11.6%、10 月 15 日 −9.0%、10 月 28 日 +10.8%、12 月 1 日 −8.9%)。Gaussian 风险模型说这四个事件每个都得等上万年才出现一回,你在 2008 年同一个秋天看到了它们四个——这就是为什么"重尾不是技术细节,是风险管理的核心"。
+
 ---
 
 ## 2.3 候选模型大比拼
@@ -130,6 +185,8 @@ $\nu \approx 3$ 时 Student-t 复现 inverse cubic law 的尾部,且方差有限
 
 更一般的是 **广义双曲分布(Generalized Hyperbolic, GH)**,它把 Student-t、NIG、VG 等都收作特例,Eberlein & Keller 1995 之后在欧洲的衍生品定价社区里流行。我们这本书不展开 GH,但你应该知道它是 Student-t 的"工业化版本"。
 
+Mandelbrot 一辈子坚持 "$\alpha < 2$、方差无穷" 这条立场,直到 2010 年去世前的访谈里他都没改口。Bouchaud 这一代,经验态度相反——大量股票、跨市场、跨时间尺度的样本 $\alpha$ 稳定在 3 附近,这就是 datum,Lévy stable 的纯数学之美让步给经验稳定性。我读这段历史的时候,印象最深的不是哪一方更对——这件事在数学层面其实有点说不清,真实数据里你永远没法严格区分"$\alpha = 3$ 的有限方差"和"$\alpha = 1.95$ 的 Lévy stable",样本量再大尾部都不够厚——印象最深的是物理学家社区怎么处理这场分歧。没有"门派",没有谁要否定 Mandelbrot 的历史地位,大家就是把数据继续刷下去,然后等谁先把机制说出来——Bouchaud 几代人写的 latent liquidity PDE(模块 8 主线)是当前最干净的一份答卷。这种"用数据慢慢磨"的方式,是物理学方法论搬到经济学最实在的东西之一,比任何具体公式都耐用。
+
 ### 2.3.4 谁赢了
 
 | 模型 | 方差 | 尾指数 | 闭式 PDF | 经验拟合 | 当前地位 |
@@ -142,6 +199,8 @@ $\nu \approx 3$ 时 Student-t 复现 inverse cubic law 的尾部,且方差有限
 | 纯经验 power-law fit | —— | 直接估 | —— | 取决于估计方法 | 学术研究 |
 
 记一句话:**"有限方差 + 幂律尾"是 1990 年代末以后的共识,Lévy stable 在 1963 年是革命性的,今天主要是教学价值**。
+
+为什么这点不只是学术嗜好,看 LTCM。1998 年初,Long-Term Capital Management 的资产负债表规模约 1250 亿美元,股东权益约 50 亿,资产/权益杠杆约 25 倍;衍生品的**名义敞口高达约 1.25 万亿美元**——这两个数字一起描述这只基金的真实风险姿态。董事会里坐着 Black–Scholes 公式的两位作者 Robert Merton 和 Myron Scholes。基金的核心策略是收敛交易,**前提是相关结构在风暴里仍然像它在常态里那样**——也就是高斯框架下"协方差是稳定参数"的隐含假设。8 月 17 日俄罗斯主权债违约,接下来四十天里,LTCM 损失约 46 亿美元,纽约联储紧急召集 14 家投行做出 36 亿美元的救助以避免系统性传染。Merton 和 Scholes 本人在事后都做过反思——具体哪个假设错了,版本不一,但有一件事是没有争议的:**如果你的内部风险模型告诉你这是"百万年一遇",而你正在经历它,那不是百万年里的衰运,是你的模型尾部不对**。$\alpha \approx 3$ 这个常数,翻译成单日波动率分布,就是 LTCM 那四十天在物理上完全允许发生的形态。
 
 ---
 
@@ -184,6 +243,8 @@ $$
 1. **阈值 $k$ 的选择极度敏感**:$k$ 太大引入分布主体的偏差,$k$ 太小方差爆炸。常用对策是画 **Hill plot**(横轴 $k$,纵轴 $\hat\alpha_k$),找"平台区"
 2. 对**慢变函数 $L(x)$** 的偏差不 robust——如果真实分布是 $L(x) x^{-\alpha}$ 而 $L$ 收敛慢,Hill 会系统性偏离 $\alpha$
 3. 默认只看右尾,左尾要单独估(对收益率,通常左右两侧 $\alpha$ 接近但不严格相等)
+
+值得提一句 Hill 估计的来路。1975 年 Bruce Hill 在 *Annals of Statistics* 上发表这篇方法论时,目标读者不是金融人——是**精算师和极值理论(extreme value theory, EVT)社区**。1970 年代极值统计在保险定价里已经是工业级工具:大灾损失、长尾保单、再保险层级的设计,都依赖 Pareto 尾的估计。Hill plot 那个"找平台"的视觉判断,是精算师面对单次大灾损失数据时已经磨了几年的实操经验。Embrechts–Klüppelberg–Mikosch 1997 的 *Modelling Extremal Events for Insurance and Finance* 这本书的副标题没说错,工具确实先在保险一侧成熟,然后在 1990 年代末才被搬到金融。Hill plot 看起来"哪都不平"是常态——我看了三年才接受"平台从来不平"这件事,初学者会觉得方法失败,其实你只要在某个有意义的区间(比如 $k$ 从 50 到 500)看到 $\hat\alpha$ 在某个值附近抖动,就足够说"尾指数大约是这个值"。**追求完美平台是新手错误**,真实数据从来不会给你严格 Pareto 的尾。
 
 ### 2.4.3 MLE on Pareto tail above $x_{\min}$(Clauset et al. 推荐)
 
@@ -295,7 +356,7 @@ Hill plot plateau (k in [50, 500]): mean alpha ≈ 2.80, std = 0.15
 2. **Hill plot(中)**:从右到左横扫 $k$,$\hat\alpha$ 在 $k \in [50, 500]$ 一段稳定在 **2.80 ± 0.15**——这就是"平台区",可以直接报告 $\hat\alpha \approx 3$
 3. **Clauset MLE(右)**:`powerlaw` 包给出 $\hat\alpha \approx 1.99$、$\hat x_{\min} \approx 0.011$。注意它的参数化是 $1+\alpha$ 在我们这边,要把 1.99 当成 $\alpha \approx 2$ 来读——这个估值偏小一点是因为它把 $x_{\min}$ 设得偏高(只用了最极端的几十个点);Hill 平台值 2.80 更接近文献上的"3 附近"
 
-**⚠️ 这里我也曾困惑**:Hill plot 看起来"哪都不平"是常态,初学者会觉得方法失败。其实你只要在某个有意义的区间(比如 $k$ 从 50 到 500)看到 $\hat\alpha$ 在某个值附近抖动,就足够说"尾指数大约是这个值"。**追求完美平台是新手错误**,真实数据从来不会给你严格 Pareto 的尾。
+**⚠️ 这里我也曾困惑**:Hill 平台值 2.80 和 Clauset 给的 1.99 相差不小,新手很容易以为某一方"错了"。两者不矛盾——Clauset 的 KS 自动选阈值倾向把 $x_{\min}$ 推得偏高(只用最极端的几十个点),给出的 $\alpha$ 是"最末端尾巴"的局部斜率;Hill 平台在更宽的区段上做平均。**两种数都报,然后说清楚各自看的是分布的哪一段**,这是任何成熟的尾分析报告的标准动作。
 
 ---
 
@@ -326,6 +387,8 @@ Hill plot plateau (k in [50, 500]): mean alpha ≈ 2.80, std = 0.15
 如果日收益率尾指数 $\alpha_d \approx 3$,你把它聚合到周、月,**$\alpha$ 会随时间尺度上升**(尾巴变轻),最终在月或季度尺度上接近高斯。这是 CLT 慢慢"赢回来"的过程。
 
 不要拿月度数据估出来的 $\alpha \approx 5$ 去推日内交易系统的风险——尺度不对。
+
+最干净的反向例子是 **2010 年 5 月 6 日 Flash Crash**。下午 14:42 到 14:47 之间,Dow 在大约五分钟内下跌近 1000 点(约 −9%),然后在二十分钟内基本恢复。这件事在**日尺度**上看是一个 −3.2% 的负 day,完全没什么特别,落在日 $\alpha \approx 3$ 的尾部里很普通的位置;但在**一分钟尺度**上看,那五分钟里出现了若干笔单只标的收益率绝对值超过 30σ 的事件(按当日 1 分钟波动率折算),estimated 一分钟 $\alpha$ 在那天显著小于一般日子的对应估计。SEC 与 CFTC 2010 年 9 月 30 日联合报告 *Findings Regarding the Market Events of May 6, 2010* 给出了完整的事件重建。这件事说明的不是"高频更可怕",是 $\alpha$ 本身是时间尺度的函数——把同一份数据 resample 到不同 bar 上,你会看到 $\alpha$ 在不同尺度上不同,是一条曲线而不是一个数。模块 8 的 PDE 视角下,这条曲线本身就是底层动力学的一种 signature。
 
 ---
 
@@ -373,7 +436,7 @@ Hill plot plateau (k in [50, 500]): mean alpha ≈ 2.80, std = 0.15
 
 #### 习题 2.5(开放,有点难)
 
-模块 1 里我们说 Mandelbrot "在无穷方差这点上过头了"。但 Taleb 等人会反过来说:有限样本里,你**永远区分不开**"$\alpha = 3$ 的有限方差分布"和"$\alpha = 1.95$ 的 Lévy stable",所以从风险管理实务出发,**应该假设最坏情况**。
+§2.1.3 里我们判定 Mandelbrot "在无穷方差这点上过头了"。但 Taleb 等人会反过来说:有限样本里,你**永远区分不开**"$\alpha = 3$ 的有限方差分布"和"$\alpha = 1.95$ 的 Lévy stable",所以从风险管理实务出发,**应该假设最坏情况**。
 
 你怎么看这个争论?以下哪一类问题应该假设无穷方差?
 
