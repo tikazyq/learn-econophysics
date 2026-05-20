@@ -4,7 +4,7 @@ language = "zh-CN"
 multilingual = false
 src = "src"
 title = "Econophysics 笔记 · 物理学家视角下的金融市场"
-description = "面向物理学家自学者的经济物理学教材:从重尾分布、随机过程到临界现象、订单簿与 ABM"
+description = "面向物理学家自学者的经济物理学教材：从重尾分布、随机过程到临界现象、订单簿与 ABM"
 
 [output.html]
 default-theme = "navy"
