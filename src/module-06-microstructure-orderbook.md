@@ -166,11 +166,14 @@ for t in range(50000):
     side = np.random.choice(["buy", "sell"])
     u = np.random.rand()
     if u < rate_limit:
-        # Half the limit orders price-improve (offset=0); rest sit 1-4 ticks deep
+        # Limit orders sit at the same-side touch and shift up to 4 ticks INTO
+        # the spread (toward the opposite touch). Clamped to one tick inside
+        # the opposite side so they don't cross the book.
         offset = np.random.choice([0, 0, 1, 2, 3, 4]) * lob.tick
         ref = lob.best_bid() if side == "buy" else lob.best_ask()
+        if ref is None:                       # book empty on this side
+            ref = lob.mid()
         price = (ref + offset) if side == "buy" else (ref - offset)
-        # Don't cross the book with a "limit" order
         opp = lob.best_ask() if side == "buy" else lob.best_bid()
         if opp is not None:
             if side == "buy" and price >= opp:  price = opp - lob.tick

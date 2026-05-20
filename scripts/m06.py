@@ -1,8 +1,12 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 
 class LOB:
@@ -75,12 +79,14 @@ for t in range(50000):
     side = np.random.choice(["buy", "sell"])
     u = np.random.rand()
     if u < rate_limit:
+        # Limit orders are placed at the same-side touch and shifted up to 4 ticks
+        # toward the opposite side (i.e. into the spread), then clamped to one
+        # tick inside the opposite touch so they don't cross the book.
         offset = np.random.choice([0, 0, 1, 2, 3, 4]) * lob.tick
         ref = lob.best_bid() if side == "buy" else lob.best_ask()
         if ref is None:
             ref = lob.mid()
         price = (ref + offset) if side == "buy" else (ref - offset)
-        # Don't cross the book with a "limit" order
         opp = lob.best_ask() if side == "buy" else lob.best_bid()
         if opp is not None:
             if side == "buy" and price >= opp:
@@ -127,8 +133,7 @@ axes[2].set_xlabel("lag")
 axes[2].set_ylabel(r"$\rho_{|r|}$")
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m06-zero-intel-lob.png",
-            dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m06-zero-intel-lob.png", dpi=110, bbox_inches="tight")
 
 print(f"#trades = {len(trades)} / {len(mids)} steps; #bars = {len(mid_bar)}")
 print(f"mid: min = {mids.min():.3f}, max = {mids.max():.3f}, "

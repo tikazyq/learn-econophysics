@@ -1,7 +1,11 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 L = 200
 dx = 0.1
@@ -20,7 +24,8 @@ rho_B = rho_B_eq.copy()
 rho_A = rho_A_eq.copy()
 
 J_meta_start, J_meta_end = 400, 1200
-J_meta_x = 0.0       # inject at the current price
+J_meta_x = 0.0       # inject at the initial price (x=0); injection point stays fixed,
+                     # the *price* drifts away from it during the meta-order
 J_meta_amp = 12.0
 
 prices = []
@@ -63,8 +68,7 @@ axes[1].set_title("Price impact of meta-order")
 axes[1].legend()
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m08-donier-pde.png",
-            dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m08-donier-pde.png", dpi=110, bbox_inches="tight")
 
 p0 = prices[J_meta_start - 1]
 p_peak = prices[J_meta_end - 1]

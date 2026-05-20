@@ -1,9 +1,13 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 tickers = [
     "AAPL","MSFT","GOOGL","AMZN","META","TSLA","NVDA","JPM","JNJ","V",
@@ -48,4 +52,4 @@ print(f"lambda_+ (MP upper edge) = {lam_plus:.3f}")
 print(f"largest = {eigvals[-1]:.2f}  (market mode)")
 print(f"top 5 eigenvalues: {np.round(eigvals[-5:][::-1], 2).tolist()}")
 
-plt.savefig("/home/user/learn-econophysics/src/assets/m04-mp-spectrum.png", dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m04-mp-spectrum.png", dpi=110, bbox_inches="tight")

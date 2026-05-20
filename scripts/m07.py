@@ -10,8 +10,12 @@ decisions inside clusters).
 
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 np.random.seed(7)
 
@@ -105,8 +109,7 @@ axes[1, 1].loglog(lags, np.maximum(acf_abs, 1e-4), "k.")
 axes[1, 1].set_title(r"ACF of $|r|$")
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m07-heterogeneous-agents.png",
-            dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m07-heterogeneous-agents.png", dpi=110, bbox_inches="tight")
 
 print(f"price: min = {p.min():.2f}, max = {p.max():.2f}, mean = {p.mean():.2f}")
 print(f"largest cluster: time mean = {biggest_cluster.mean():.1f}, max = {biggest_cluster.max()}")

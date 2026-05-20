@@ -1,7 +1,11 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 np.random.seed(42)
 
@@ -49,7 +53,7 @@ axes[1].axvline(Tc_theory, color="r", ls="--")
 axes[1].set_xlabel("T"); axes[1].set_ylabel(r"$\chi$"); axes[1].set_title("Susceptibility")
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m05-ising-transition.png", dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m05-ising-transition.png", dpi=110, bbox_inches="tight")
 
 i_peak = int(np.argmax(chi))
 print(f"Theoretical Tc = {Tc_theory:.3f}")

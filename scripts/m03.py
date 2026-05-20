@@ -1,9 +1,13 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 spx = yf.download("^GSPC", start="2005-01-01", end="2025-01-01", auto_adjust=True, progress=False)
 r = np.log(spx["Close"]).diff().dropna().values.flatten()
@@ -30,4 +34,4 @@ print(f"ACF(r) at lag 1, 2, 3 = {acf_r[1]:.3f}, {acf_r[2]:.3f}, {acf_r[3]:.3f}")
 print(f"ACF(|r|) at lag 1, 10, 60 = {acf_abs[0]:.3f}, {acf_abs[9]:.3f}, {acf_abs[59]:.3f}")
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m03-vol-clustering.png", dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m03-vol-clustering.png", dpi=110, bbox_inches="tight")

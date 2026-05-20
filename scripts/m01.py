@@ -1,9 +1,13 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
 from scipy import stats
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 spx = yf.download("^GSPC", start="2005-01-01", end="2025-01-01", auto_adjust=True, progress=False)
 returns = np.log(spx["Close"]).diff().dropna().values.flatten()
@@ -23,7 +27,7 @@ stats.probplot(returns, dist="norm", plot=axes[1])
 axes[1].set_title("Q-Q plot against normal")
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m01-gaussian-fails.png", dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m01-gaussian-fails.png", dpi=110, bbox_inches="tight")
 print(f"n_obs = {len(returns)}")
 print(f"mu = {mu:.6f}, sigma = {sigma:.6f}")
 print(f"min = {returns.min():.4f}, max = {returns.max():.4f}")

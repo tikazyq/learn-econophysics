@@ -1,8 +1,12 @@
 import matplotlib
 matplotlib.use("Agg")
+from pathlib import Path
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
+ASSETS.mkdir(parents=True, exist_ok=True)
 
 spx = yf.download("^GSPC", start="2005-01-01", end="2025-01-01", auto_adjust=True, progress=False)
 returns = np.log(spx["Close"]).diff().dropna().values.flatten()
@@ -51,4 +55,4 @@ print(f"Hill plot plateau (k in [50, 500]): mean alpha ≈ {hill[plateau_mask].m
       f"std = {hill[plateau_mask].std():.2f}")
 
 plt.tight_layout()
-plt.savefig("/home/user/learn-econophysics/src/assets/m02-power-law-alpha.png", dpi=110, bbox_inches="tight")
+plt.savefig(ASSETS / "m02-power-law-alpha.png", dpi=110, bbox_inches="tight")

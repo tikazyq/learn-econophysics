@@ -156,9 +156,10 @@ rho_A_eq = np.maximum(x, 0)  + 0.3 * soft
 rho_B = rho_B_eq.copy()
 rho_A = rho_A_eq.copy()
 
-# Meta-order:在 [t_start, t_end) 时间窗内,持续在当前价位注入买单
+# Meta-order:在 [t_start, t_end) 时间窗内,持续在固定位置 x=0(初始价位)注入买单。
+# 注入点不随价格移动——这是简化设定;真实 meta-order 会跟着市场走,但教学上固定点更清晰
 J_meta_start, J_meta_end = 400, 1200
-J_meta_x = 0.0       # 在 x = 0 处注入(初始价位)
+J_meta_x = 0.0       # 固定在初始价位 x = 0
 J_meta_amp = 12.0    # 注入速率(单位密度/时间)
 
 prices = []
