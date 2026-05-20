@@ -102,7 +102,7 @@ ABM 真正动摇主流经济学的不是"DSGE 错了",而是:
 
 后两点是 2008 后被各大央行(尤其英格兰银行)严肃看的方向。Andy Haldane 2012 年那篇讲话直接呼吁把 ABM 纳入金融稳定监测。
 
-值得在这里多说一句 Haldane 那次讲话。Andrew Haldane 在 2012 年是英格兰银行的首席经济学家(后来升到执行董事 financial stability),他那场题为 *The Dappled World* 的讲话<!-- TODO: verify exact title; commonly cited as "The Dappled World" delivered Nov 2012 -->,是央行级别的政策人物**公开**认领 agent-based modeling 作为系统性风险监测工具的标志事件。在 Haldane 之前,ABM 在金融政策圈基本属于"圣塔菲研究所的东西"——意思是有意思,但不在主流央行的工具箱里。Haldane 这场讲话之后,BoE、ECB、IMF 都启动了 ABM × 金融稳定的内部工作组,RAMSI 这类系统级 stress test 框架开始把异质 agent 类型分布纳入测试设计。这件事的意义不在 ABM "证明了自己",而在政策制定者主动承认 **代表性 agent 框架在 2008 前低估尾部风险**——而 Haldane 的判断是,这种低估是结构性的、不是参数误调可以救的。从 2012 到现在,这条线已经从"试点"变成"常规", econophysics 在政策层面最大的真实开口就是这条。
+值得在这里多说一句 Haldane 这一系列讲话。Andrew Haldane 在 2012 年前后是英格兰银行金融稳定执行董事——一连串面向政策圈的讲话(包括关于金融网络拓扑、系统性风险与异质 agent 建模的几篇)中,他是央行级别的政策人物**公开**认领 agent-based modeling 作为系统性风险监测工具的标志人物。在 Haldane 之前,ABM 在金融政策圈基本属于"圣塔菲研究所的东西"——意思是有意思,但不在主流央行的工具箱里。Haldane 这场讲话之后,BoE、ECB、IMF 都启动了 ABM × 金融稳定的内部工作组,RAMSI 这类系统级 stress test 框架开始把异质 agent 类型分布纳入测试设计。这件事的意义不在 ABM "证明了自己",而在政策制定者主动承认 **代表性 agent 框架在 2008 前低估尾部风险**——而 Haldane 的判断是,这种低估是结构性的、不是参数误调可以救的。从 2012 到现在,这条线已经从"试点"变成"常规", econophysics 在政策层面最大的真实开口就是这条。
 
 ---
 

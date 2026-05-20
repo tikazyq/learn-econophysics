@@ -3,7 +3,7 @@
 > "Volatility, not return, is the variable that explains most of what happens in financial markets."
 > —— Engle & Patton (2001), paraphrased
 
-1971 年,英国数学家 Alan Hawkes 在 *Biometrika* 58(1) 发表了 *Spectra of Some Self-Exciting and Mutually Exciting Point Processes*——一篇当时几乎没人引用、四十年后突然成为一整个子领域基础设施的论文。<!-- TODO: verify Hawkes' institutional affiliation in 1971 --> Hawkes 当时想解决的问题不在金融,而在**地震学**:余震序列里的事件强度依赖于过去的事件——一次大震发生后,接下来几小时到几天里,小震和余震的概率显著上升,然后慢慢衰减回背景速率。普通的 Poisson 过程没法描述这种"过去影响未来"的结构,因为 Poisson 假设事件间相互独立。Hawkes 给的解是把强度本身写成历史事件的函数——每发生一个事件,瞬时强度跳一下,然后按某个核 $\phi$ 衰减。地震学社区把这套模型用了二十多年——直到 2000 年代初,Bacry–Muzy 和 Bouchaud 几代人意识到限价单簿里的事件序列结构和余震序列在数学上是同一类对象。从那以后,Hawkes 过程在量化金融里几乎成了高频数据分析的默认建模工具。这一章的目的之一,是看清楚一个 1971 年从地震学里出来的工具,怎么变成了 2010 年代金融市场最重要的微观结构语言之一。
+1971 年,数学家 Alan Hawkes 在 *Biometrika* 58(1) 发表了 *Spectra of Some Self-Exciting and Mutually Exciting Point Processes*——一篇当时几乎没人引用、四十年后突然成为一整个子领域基础设施的论文。 Hawkes 当时想解决的问题不在金融,而在**地震学**:余震序列里的事件强度依赖于过去的事件——一次大震发生后,接下来几小时到几天里,小震和余震的概率显著上升,然后慢慢衰减回背景速率。普通的 Poisson 过程没法描述这种"过去影响未来"的结构,因为 Poisson 假设事件间相互独立。Hawkes 给的解是把强度本身写成历史事件的函数——每发生一个事件,瞬时强度跳一下,然后按某个核 $\phi$ 衰减。地震学社区把这套模型用了二十多年——直到 2000 年代初,Bacry–Muzy 和 Bouchaud 几代人意识到限价单簿里的事件序列结构和余震序列在数学上是同一类对象。从那以后,Hawkes 过程在量化金融里几乎成了高频数据分析的默认建模工具。这一章的目的之一,是看清楚一个 1971 年从地震学里出来的工具,怎么变成了 2010 年代金融市场最重要的微观结构语言之一。
 
 模块 2 告诉我们**收益率分布是重尾的**——但那是把整条时间序列拍扁成一个直方图看的结果。这模块要把时间维度加回来:**收益率序列怎么按时间演化?它的内部结构是什么?**
 

@@ -33,7 +33,7 @@ $$
 - 标普 500,日数据 5 年 ≈ 1250 天,$q = 500/1250 = 0.4$ —— 非常不可忽略
 - 组合优化用 Markowitz 公式 $w^* = \Sigma^{-1}\mu$ 要求矩阵求逆,**$\hat\Sigma$ 的小特征值被放大成巨大权重**——这就是"Markowitz 优化输出垃圾"现象的数学根源
 
-值得提一下 Harry Markowitz 本人后来对自己 1952 年那篇 *Journal of Finance* 的态度。Markowitz 在多次公开访谈里——最被引用的是和 Jason Zweig 在 *Money* 杂志的访谈——承认自己个人退休金账户基本是**等权重持有**几只指数基金,不做均值-方差优化。<!-- TODO: verify exact venue/year of Markowitz "I split my contributions fifty-fifty" quote --> 他给的理由不是"我的理论错了",而是"在我自己面对的样本规模和噪声水平下,我自己写的那个最优化解不出有意义的东西"。这件事的物理学翻译是:**Markowitz 公式假设 $\Sigma$ 是给定的,但在 $N/T = 0.4$ 这种现实情形下,$\hat\Sigma$ 不是 $\Sigma$**——它的小特征值是噪声乘以小数除得很大的杠杆,推出的权重几乎都在某几个方向上极端配置。Bouchaud–Potters 那本书第 10 章把这件事用数据画出来,结论简单:**用噪声 $\hat\Sigma$ 直接做 Markowitz,样本外组合的实现波动率比直接等权重还高**。Markowitz 这话不是谦虚,是统计精度的真实约束。
+值得提一下 Harry Markowitz 本人后来对自己 1952 年那篇 *Journal of Finance* 的态度。Markowitz 在多次公开访谈里——Jason Zweig 在《Your Money and Your Brain》及多篇专栏里反复引用过——承认自己个人退休金账户基本是**等权重持有**几只指数基金,不做均值-方差优化。他给的理由不是"我的理论错了",而是大致"在我自己面对的样本规模和噪声水平下,这个最优化解不出有意义的东西"。这件事的物理学翻译是:**Markowitz 公式假设 $\Sigma$ 是给定的,但在 $N/T = 0.4$ 这种现实情形下,$\hat\Sigma$ 不是 $\Sigma$**——它的小特征值是噪声乘以小数除得很大的杠杆,推出的权重几乎都在某几个方向上极端配置。Bouchaud–Potters 那本书第 10 章把这件事用数据画出来,结论简单:**用噪声 $\hat\Sigma$ 直接做 Markowitz,样本外组合的实现波动率比直接等权重还高**。Markowitz 这话不是谦虚,是统计精度的真实约束。
 
 ---
 
