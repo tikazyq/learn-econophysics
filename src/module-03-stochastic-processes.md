@@ -159,11 +159,21 @@ plt.tight_layout()
 plt.show()
 ```
 
-**你应该看到**:
+跑出来的数字(`scripts/m03.py`):
 
-1. $r_t$ 的 ACF 在 lag 1 之后几乎全在置信带内——**短程独立**,无法直接预测下一天涨跌
-2. $|r_t|$ 的 ACF 在 60 个 lag 时仍然显著为正——波动率聚集
-3. log-log 图上 $\rho_{|r|}(\tau)$ 大致是直线,斜率约 $-0.3$,对应 $\gamma \approx 0.3$,符合文献区间
+```text
+Estimated decay exponent gamma = 0.45
+ACF(r) at lag 1, 2, 3 = -0.121, 0.002, 0.016
+ACF(|r|) at lag 1, 10, 60 = 0.320, 0.322, 0.088
+```
+
+![ACF of returns, absolute returns, and log-log decay](assets/m03-vol-clustering.png)
+
+三张图配这几行打印,落地结论是:
+
+1. **左:$r_t$ 的 ACF**——lag 1 出现 -0.12 这种小幅负相关(短期反转的痕迹),之后基本钻进置信带。**方向不可预测**
+2. **中:$|r_t|$ 的 ACF**——lag 1 就是 0.32,到 lag 10 仍是 0.32,到 lag 60 还有 0.09,**完全不像独立同分布**——这就是波动率聚集
+3. **右:log-log 衰减**——斜率给出 $\gamma \approx 0.45$,落在文献的 $0.2 \sim 0.5$ 区间内,确认幂律而非指数衰减
 
 ---
 

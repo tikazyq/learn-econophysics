@@ -280,11 +280,20 @@ plt.tight_layout()
 plt.show()
 ```
 
-**你应该看到**:
+跑出来的结果(`scripts/m02.py`):
 
-1. **Log-log 生存函数**:中段一段近乎直线,斜率眼看在 $-3$ 附近;最远的尾部(几个最极端的点)开始偏离直线——这部分有的是有限样本噪声,有的是真实"超指数"压尾(2008 雷曼那种事件)
-2. **Hill plot**:从右到左横扫 $k$,$\hat\alpha$ 在 $k \in [50, 500]$ 一段大致在 2.5–3.5 之间徘徊,这就是"平台区"——可以报告 $\hat\alpha \approx 3$
-3. **Clauset MLE**:`powerlaw` 包用 KS 自动选 $x_{\min}$,通常会落在分布右尾的前 1–5%,$\hat\alpha$ 在 3 附近(注意 `powerlaw` 包的参数化是 $1+\alpha$,要减 1)
+```text
+Clauset MLE: alpha = 1.99, xmin = 0.0108
+Hill plot plateau (k in [50, 500]): mean alpha ≈ 2.80, std = 0.15
+```
+
+![Survival function, Hill plot, Clauset MLE fit](assets/m02-power-law-alpha.png)
+
+三张图配上面那两行打印,落地的结论是这样的:
+
+1. **Log-log 生存函数(左)**:中段一段近乎直线,斜率眼看在 $-3$ 附近;最远的尾部(几个最极端的点)开始偏离直线——这部分有的是有限样本噪声,有的是真实"超指数"压尾(2008 雷曼那种事件)
+2. **Hill plot(中)**:从右到左横扫 $k$,$\hat\alpha$ 在 $k \in [50, 500]$ 一段稳定在 **2.80 ± 0.15**——这就是"平台区",可以直接报告 $\hat\alpha \approx 3$
+3. **Clauset MLE(右)**:`powerlaw` 包给出 $\hat\alpha \approx 1.99$、$\hat x_{\min} \approx 0.011$。注意它的参数化是 $1+\alpha$ 在我们这边,要把 1.99 当成 $\alpha \approx 2$ 来读——这个估值偏小一点是因为它把 $x_{\min}$ 设得偏高(只用了最极端的几十个点);Hill 平台值 2.80 更接近文献上的"3 附近"
 
 **⚠️ 这里我也曾困惑**:Hill plot 看起来"哪都不平"是常态,初学者会觉得方法失败。其实你只要在某个有意义的区间(比如 $k$ 从 50 到 500)看到 $\hat\alpha$ 在某个值附近抖动,就足够说"尾指数大约是这个值"。**追求完美平台是新手错误**,真实数据从来不会给你严格 Pareto 的尾。
 

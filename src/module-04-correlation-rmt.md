@@ -154,12 +154,25 @@ print(f"largest = {eigvals[-1]:.2f}  (market mode)")
 plt.show()
 ```
 
-**你应该看到**:
+跑出来的数字(`scripts/m04.py`,2020–2024 五年日数据):
 
-- 大部分特征值挤在 MP 谱内,与红色理论曲线重合
-- $\lambda_+ \approx (1+\sqrt{q})^2$ 附近有断崖
-- 右侧有几个孤立的大特征值——最大那个明显远离 MP 上界,即**市场模式**
-- 中间几个超出 MP 不远的——行业模式
+```text
+N=99, T=1257, q=0.079
+#eigenvalues > lambda_+ = 5 / 99
+lambda_+ (MP upper edge) = 1.640
+largest = 42.46  (market mode)
+top 5 eigenvalues: [42.46, 6.33, 5.61, 2.10, 1.82]
+```
+
+![Eigenvalue spectrum vs Marchenko-Pastur](assets/m04-mp-spectrum.png)
+
+照着图和数字读:
+
+- 大部分特征值挤在 $[\lambda_-, \lambda_+] \approx [0.51, 1.64]$ 这段内,与红色 MP 曲线重合——**99 个里有 94 个被理论吸收成"噪声方向"**
+- $\lambda_+$ 附近确有断崖,边缘衔接干净
+- 右侧 **5 个孤立大特征值** 跳出 MP 区域:最大 42.46 ≈ 26 倍 $\lambda_+$,这就是**市场模式**(几乎所有股票一起涨/跌)
+- 6.33、5.61、2.10、1.82 这四个超出但不夸张——对应**行业模式**(科技、能源、金融…)
+- 用 clipping 时,会把 [0.51, 1.64] 之间的特征值替换成它们的均值,只保留这 5 个 outlier 的信息
 
 ---
 
