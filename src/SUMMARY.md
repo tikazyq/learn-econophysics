@@ -13,4 +13,4 @@
 - [模块 5 · 临界现象](./module-05-critical-phenomena.md)
 - [模块 6 · 微观结构与订单簿](./module-06-microstructure-orderbook.md)
 - [模块 7 · ABM 与涌现](./module-07-agent-based-models.md)
-- [模块 8 · 流体力学视角与开放方向](./module-08-fluid-dynamics-frontiers.md)
+- [模块 8 · Self-referential 动力学](./module-08-fluid-dynamics-frontiers.md)
